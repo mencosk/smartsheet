@@ -22,22 +22,27 @@ smartsheet/
 │   │       ├── ai_analyzer.py          # Gemini integration & prompt engineering
 │   │       └── chart_data_builder.py   # Data aggregation for charts
 │   ├── tests/                    # pytest test suite (39 tests)
+│   ├── Dockerfile                # Production container image
 │   ├── requirements.txt
 │   └── .env.example
 │
-└── web/                          # React SPA (Vite + TypeScript)
-    └── src/
-        ├── api/client.ts         # API client (upload, chart-data)
-        ├── i18n/                 # Internationalization (ES/EN)
-        ├── components/
-        │   ├── FileUpload.tsx          # Drag-and-drop file upload
-        │   ├── LoadingState.tsx        # AI processing indicator
-        │   ├── AnalysisCard.tsx        # AI suggestion cards
-        │   ├── ChartRenderer.tsx       # Recharts-based chart rendering
-        │   └── Dashboard.tsx           # Interactive dashboard grid
-        ├── tests/                # Vitest + React Testing Library (32 tests)
-        ├── App.tsx               # Main application with state management
-        └── index.css             # Dark-themed professional design
+├── web/                          # React SPA (Vite + TypeScript)
+│   ├── src/
+│   │   ├── api/client.ts         # API client (configurable base URL)
+│   │   ├── i18n/                 # Internationalization (ES/EN)
+│   │   ├── components/
+│   │   │   ├── FileUpload.tsx          # Drag-and-drop file upload
+│   │   │   ├── LoadingState.tsx        # AI processing indicator
+│   │   │   ├── AnalysisCard.tsx        # AI suggestion cards
+│   │   │   ├── ChartRenderer.tsx       # Recharts-based chart rendering
+│   │   │   └── Dashboard.tsx           # Interactive dashboard grid
+│   │   ├── tests/                # Vitest + React Testing Library (32 tests)
+│   │   ├── App.tsx               # Main application with state management
+│   │   └── index.css             # Dark-themed professional design
+│   ├── Dockerfile                # Multi-stage build (Node + nginx)
+│   └── nginx.conf                # Reverse proxy config for Docker
+│
+└── docker-compose.yml            # Single-command local deployment
 ```
 
 ---
@@ -309,6 +314,30 @@ The core AI integration follows a structured approach designed for **consistency
 
 ---
 
+## 🌐 Deployment
+
+The project supports deployment to cloud platforms like [Render](https://render.com):
+
+- **API** — Deploy as a **Web Service** with Root Directory set to `api` (uses the Dockerfile).
+- **Web** — Deploy as a **Static Site** with Root Directory set to `web`, Build Command `npm ci && npm run build`, and Publish Directory `dist`.
+- Set the environment variable `VITE_API_BASE` on the web service to point to the API's public URL (e.g., `https://your-api.onrender.com/api`).
+- Set `GEMINI_API_KEY` as an environment variable on the API service.
+
+---
+
+## 🔮 Upcoming Features
+
+- **Multi-language support (i18n)** — Full runtime language switching between Spanish, English, and additional locales
+- **Security enhancements** — Rate limiting, input sanitization, and authentication for API endpoints
+- **Support for additional AI models** — Integration with OpenAI GPT, Anthropic Claude, and other LLM providers
+- **User-provided API keys** — Allow users to enter and use their own AI provider API keys directly from the UI
+
+---
+
 ## License
 
 MIT
+
+---
+
+© Kevin Mencos

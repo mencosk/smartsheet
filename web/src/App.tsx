@@ -164,6 +164,10 @@ function App() {
           </>
         )}
       </main>
+
+      <footer className="footer">
+        <p>© Kevin Mencos</p>
+      </footer>
     </div>
   );
 }
