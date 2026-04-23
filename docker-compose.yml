@@ -1,0 +1,13 @@
+services:
+  api:
+    build: ./api
+    env_file: ./api/.env
+    ports:
+      - "8000:8000"
+
+  web:
+    build: ./web
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
