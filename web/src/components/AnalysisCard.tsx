@@ -39,6 +39,7 @@ export function AnalysisCard({ suggestion, isAdded, onToggle, t }: AnalysisCardP
       <button
         className={`analysis-card__btn ${isAdded ? "analysis-card__btn--added" : ""}`}
         onClick={onToggle}
+        aria-pressed={isAdded}
       >
         {isAdded ? (
           <>

@@ -6,7 +6,7 @@ interface LoadingStateProps {
 
 export function LoadingState({ t }: LoadingStateProps) {
   return (
-    <div className="loading-state">
+    <div className="loading-state" role="status" aria-live="polite" aria-busy="true">
       <div className="loading-state__spinner">
         <div className="spinner"></div>
       </div>

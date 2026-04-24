@@ -257,29 +257,33 @@ npm test
 
 ## 🧠 AI Prompt Engineering Approach
 
-The core AI integration follows a structured approach designed for **consistency, precision, and actionable outputs**:
+The core AI integration follows a structured, production-grade approach designed for **consistency, diversity, precision, and actionable outputs**:
 
 ### Prompt Design Principles
 
-1. **Role assignment**: The prompt instructs Gemini to act as an *expert data analyst*, providing domain-specific expertise in its suggestions.
-
-2. **Rich context injection**: Rather than sending raw data, the system sends a **structured schema summary** to the LLM that includes:
+1. **Rich context injection**: Rather than sending raw data, the system sends a **structured schema summary** to the LLM that includes:
    - Column names and data types
    - Non-null counts and unique value counts per column
    - Full numeric statistics (`describe()` output)
    - Sample data (first 5 rows)
 
-3. **Strict output format**: The prompt explicitly defines the expected JSON structure with specific keys (`title`, `chart_type`, `parameters`, `insight`) and valid values for each, ensuring machine-parseable responses.
+2. **Strict JSON schema enforcement**: The prompt defines the exact required keys (`title`, `chart_type`, `parameters`, `insight`), allowed values per field, and parameter shapes per chart type — ensuring deterministic, machine-parseable responses with no extra keys, no markdown, and no prose.
 
-4. **Guard rails**: The prompt includes explicit rules such as:
-   - Only use column names that exist in the dataset
-   - Choose chart types that match the data types
-   - Prioritize actionable insights
-   - Return ONLY valid JSON (no markdown wrapping)
+3. **Chart type diversity**: The prompt enforces that each suggestion uses a **different chart type** before any type is repeated, and covers distinct analytical angles (comparison, trend, composition, correlation, distribution) to maximize insight variety.
 
-5. **Localization in prompt**: Titles and insights are requested in Spanish, keeping the UI language consistent without post-processing.
+4. **Builder-aware compatibility**: The prompt explicitly handles downstream edge cases — for example, when `aggregation = "count"`, a valid `y_axis` or `value` column must still be provided because the backend chart data builder validates all referenced columns.
 
-6. **Aggregation awareness**: The prompt understands aggregation types (`sum`, `mean`, `count`) so the backend can accurately group and aggregate data without guessing.
+5. **Smart chart selection**: The prompt includes rules for choosing appropriate chart types based on data characteristics:
+   - Scatter only with 2+ numeric columns
+   - Line/area only with ordered x-axis (dates, periods, sequences)
+   - Pie only with low-cardinality categories (≤10 unique values)
+   - Avoid identifier columns (id, code, uuid) as analytical dimensions
+
+6. **Edge-case resilience**: The prompt gracefully handles narrow datasets — few columns, all-categorical, all-numeric, or very small row counts — by returning fewer but valid suggestions rather than forcing weak charts.
+
+7. **Localization in prompt**: Titles and insights are requested in Spanish, keeping the UI language consistent without post-processing.
+
+8. **Aggregation awareness**: The prompt understands aggregation types (`sum`, `mean`, `count`) and enforces that `sum`/`mean` are only applied to numeric columns.
 
 ---
 
