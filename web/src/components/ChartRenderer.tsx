@@ -49,10 +49,26 @@ const tooltipStyle = {
   color: "#f1f5f9",
 };
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    setIsMobile(mq.matches);
+
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  return isMobile;
+}
+
 export function ChartRenderer({ suggestion, sessionId, t }: ChartRendererProps) {
   const [data, setData] = useState<ChartDataPoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     let cancelled = false;
@@ -90,26 +106,30 @@ export function ChartRenderer({ suggestion, sessionId, t }: ChartRendererProps) 
   }
 
   if (error) return <div className="chart-error">{error}</div>;
-  if (!data.length) return <div className="chart-error">No data available</div>;
+  if (!data.length) return <div className="chart-error">{t("noDataAvailable")}</div>;
 
-  const axisMargin = { top: 5, right: 20, bottom: 60, left: 20 };
-  const axisTick = { fontSize: 11, fill: "#94a3b8" };
+  const chartHeight = isMobile ? 240 : 300;
+  const axisMargin = isMobile
+    ? { top: 5, right: 10, bottom: 50, left: 10 }
+    : { top: 5, right: 20, bottom: 60, left: 20 };
+  const axisTick = { fontSize: isMobile ? 10 : 11, fill: "#94a3b8" };
+  const xAxisProps = {
+    dataKey: "name" as const,
+    tick: axisTick,
+    angle: -35,
+    textAnchor: "end" as const,
+    interval: isMobile ? ("preserveStartEnd" as const) : (0 as const),
+    height: isMobile ? 60 : 80,
+  };
 
   const renderChart = () => {
     switch (suggestion.chart_type) {
       case "bar":
         return (
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={chartHeight}>
             <BarChart data={data} margin={axisMargin}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-              <XAxis
-                dataKey="name"
-                tick={axisTick}
-                angle={-35}
-                textAnchor="end"
-                interval={0}
-                height={80}
-              />
+              <XAxis {...xAxisProps} />
               <YAxis tick={axisTick} />
               <Tooltip contentStyle={tooltipStyle} />
               <Bar dataKey="value" fill="#6366f1" radius={[4, 4, 0, 0]} />
@@ -119,17 +139,10 @@ export function ChartRenderer({ suggestion, sessionId, t }: ChartRendererProps) 
 
       case "line":
         return (
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={chartHeight}>
             <LineChart data={data} margin={axisMargin}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-              <XAxis
-                dataKey="name"
-                tick={axisTick}
-                angle={-35}
-                textAnchor="end"
-                interval={0}
-                height={80}
-              />
+              <XAxis {...xAxisProps} />
               <YAxis tick={axisTick} />
               <Tooltip contentStyle={tooltipStyle} />
               <Line
@@ -137,7 +150,7 @@ export function ChartRenderer({ suggestion, sessionId, t }: ChartRendererProps) 
                 dataKey="value"
                 stroke="#8b5cf6"
                 strokeWidth={2}
-                dot={{ fill: "#8b5cf6", r: 4 }}
+                dot={isMobile ? false : { fill: "#8b5cf6", r: 4 }}
                 activeDot={{ r: 6 }}
               />
             </LineChart>
@@ -146,17 +159,10 @@ export function ChartRenderer({ suggestion, sessionId, t }: ChartRendererProps) 
 
       case "area":
         return (
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={chartHeight}>
             <AreaChart data={data} margin={axisMargin}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-              <XAxis
-                dataKey="name"
-                tick={axisTick}
-                angle={-35}
-                textAnchor="end"
-                interval={0}
-                height={80}
-              />
+              <XAxis {...xAxisProps} />
               <YAxis tick={axisTick} />
               <Tooltip contentStyle={tooltipStyle} />
               <defs>
@@ -178,7 +184,7 @@ export function ChartRenderer({ suggestion, sessionId, t }: ChartRendererProps) 
 
       case "pie":
         return (
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={chartHeight}>
             <PieChart>
               <Pie
                 data={data}
@@ -186,28 +192,31 @@ export function ChartRenderer({ suggestion, sessionId, t }: ChartRendererProps) 
                 nameKey="name"
                 cx="50%"
                 cy="50%"
-                outerRadius={100}
-                innerRadius={50}
+                outerRadius={isMobile ? 75 : 100}
+                innerRadius={isMobile ? 35 : 50}
                 paddingAngle={2}
-                label={({ name, percent }: { name?: string; percent?: number }) =>
-                  `${name ?? ""} (${((percent ?? 0) * 100).toFixed(0)}%)`
+                label={
+                  isMobile
+                    ? false
+                    : ({ name, percent }: { name?: string; percent?: number }) =>
+                        `${name ?? ""} (${((percent ?? 0) * 100).toFixed(0)}%)`
                 }
-                labelLine={{ stroke: "#64748b" }}
+                labelLine={isMobile ? false : { stroke: "#64748b" }}
               >
                 {data.map((_, index) => (
                   <Cell key={index} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
               <Tooltip contentStyle={tooltipStyle} />
-              <Legend wrapperStyle={{ fontSize: 12, color: "#94a3b8" }} />
+              <Legend wrapperStyle={{ fontSize: 11, color: "#94a3b8" }} />
             </PieChart>
           </ResponsiveContainer>
         );
 
       case "scatter":
         return (
-          <ResponsiveContainer width="100%" height={300}>
-            <ScatterChart margin={{ top: 5, right: 20, bottom: 20, left: 20 }}>
+          <ResponsiveContainer width="100%" height={chartHeight}>
+            <ScatterChart margin={isMobile ? { top: 5, right: 10, bottom: 10, left: 10 } : { top: 5, right: 20, bottom: 20, left: 20 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
               <XAxis
                 dataKey="x"
@@ -226,9 +235,13 @@ export function ChartRenderer({ suggestion, sessionId, t }: ChartRendererProps) 
         );
 
       default:
-        return <div>Unsupported chart type: {suggestion.chart_type}</div>;
+        return <div className="chart-error">{t("unsupportedChart")}</div>;
     }
   };
 
-  return <div className="chart-renderer">{renderChart()}</div>;
+  return (
+    <div className="chart-renderer" aria-label={suggestion.title}>
+      {renderChart()}
+    </div>
+  );
 }

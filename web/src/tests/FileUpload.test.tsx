@@ -11,7 +11,7 @@ describe("FileUpload", () => {
     render(
       <FileUpload onFileSelect={vi.fn()} selectedFile={null} onClear={vi.fn()} t={t} />
     );
-    expect(screen.getByText(locales.es.uploadSubtitle)).toBeInTheDocument();
+    expect(screen.getByText(locales.es.chooseFile)).toBeInTheDocument();
     expect(screen.getByText(locales.es.uploadFormats)).toBeInTheDocument();
     expect(screen.getByText(locales.es.uploadMaxSize)).toBeInTheDocument();
   });
@@ -33,7 +33,7 @@ describe("FileUpload", () => {
     render(
       <FileUpload onFileSelect={vi.fn()} selectedFile={file} onClear={onClear} t={t} />
     );
-    await user.click(screen.getByLabelText("Remove file"));
+    await user.click(screen.getByLabelText(locales.es.removeFile));
     expect(onClear).toHaveBeenCalledTimes(1);
   });
 
@@ -42,7 +42,7 @@ describe("FileUpload", () => {
     render(
       <FileUpload onFileSelect={onFileSelect} selectedFile={null} onClear={vi.fn()} t={t} />
     );
-    const dropZone = screen.getByText(locales.es.uploadSubtitle).closest(".drop-zone")!;
+    const dropZone = screen.getByText(locales.es.chooseFile).closest(".drop-zone")!;
     const file = new File(["data"], "test.xlsx", {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
@@ -58,7 +58,7 @@ describe("FileUpload", () => {
     render(
       <FileUpload onFileSelect={vi.fn()} selectedFile={null} onClear={vi.fn()} t={t} />
     );
-    const dropZone = screen.getByText(locales.es.uploadSubtitle).closest(".drop-zone")!;
+    const dropZone = screen.getByText(locales.es.chooseFile).closest(".drop-zone")!;
     fireEvent.dragEnter(dropZone);
     expect(screen.getByText(locales.es.dragActive)).toBeInTheDocument();
   });

@@ -68,6 +68,14 @@ export function FileUpload({ onFileSelect, selectedFile, onClear, t }: FileUploa
           onDragLeave={handleDragOut}
           onDragOver={handleDrag}
           onDrop={handleDrop}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              inputRef.current?.click();
+            }
+          }}
           onClick={() => inputRef.current?.click()}
         >
           <input
@@ -78,10 +86,20 @@ export function FileUpload({ onFileSelect, selectedFile, onClear, t }: FileUploa
             style={{ display: "none" }}
           />
           <div className="drop-zone__icon">
-            <Upload size={48} strokeWidth={1.5} />
+            <Upload size={40} strokeWidth={1.5} />
           </div>
-          <p className="drop-zone__title">
-            {isDragging ? t("dragActive") : t("uploadSubtitle")}
+          <button
+            className="drop-zone__choose-btn"
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              inputRef.current?.click();
+            }}
+          >
+            {t("chooseFile")}
+          </button>
+          <p className="drop-zone__hint">
+            {isDragging ? t("dragActive") : t("dragHint")}
           </p>
           <div className="drop-zone__info">
             <span>{t("uploadFormats")}</span>
@@ -90,12 +108,16 @@ export function FileUpload({ onFileSelect, selectedFile, onClear, t }: FileUploa
         </div>
       ) : (
         <div className="file-preview">
-          <FileSpreadsheet size={32} />
+          <FileSpreadsheet size={28} />
           <div className="file-preview__info">
             <span className="file-preview__name">{selectedFile.name}</span>
             <span className="file-preview__size">{formatSize(selectedFile.size)}</span>
           </div>
-          <button className="file-preview__remove" onClick={onClear} aria-label="Remove file">
+          <button
+            className="file-preview__remove"
+            onClick={onClear}
+            aria-label={t("removeFile")}
+          >
             <X size={18} />
           </button>
         </div>
